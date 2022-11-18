@@ -10,7 +10,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-
+// Connect and create mongodb database
 mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
 
 const userSchema = {
