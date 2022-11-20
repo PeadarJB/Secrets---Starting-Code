@@ -2,6 +2,7 @@ const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption")
 
 const app = express();
 
@@ -13,10 +14,13 @@ app.use(bodyParser.urlencoded({
 // Connect and create mongodb database
 mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
 
-const userSchema = {
+const userSchema = new mongoose.Schema ({
   email: String,
   password: String,
-};
+});
+// Adding encryption to the password field in the userSchema
+const secret = "Thisisourlittlesecret."
+userSchema.plugin(encrypt, {secret: secret, encryptedFields: ["password"]});
 
 const User = new mongoose.model("User", userSchema);
 
@@ -32,7 +36,7 @@ app.get("/register", function(req, res){
   res.render("register");
 });
 
-
+// Send users to the "secrets" page if password matches in DB
 app.post("/register", function(req, res){
   const newUser = new User ({
     email: req.body.username,
@@ -52,7 +56,7 @@ app.post("/login", function(req, res){
   const username = req.body.username;
   const password = req.body.password;
 
-  User.findOne({email: username, password: password}, function(err, foundUser){
+  User.findOne({email: username}, function(err, foundUser){
     if(err) {
       console.log(err);
     } else {
