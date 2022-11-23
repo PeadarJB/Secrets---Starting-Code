@@ -75,6 +75,11 @@ app.get("/secrets", function(req, res) {
   }
 });
 
+app.get("/logout", function(req, res){
+  res.logout();
+  res.redirect("/");
+});
+
 // Send users to the "secrets" page if password matches in DB
 app.post("/register", function(req, res) {
 
