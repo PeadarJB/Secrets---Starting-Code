@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   googleId: String,
-  secret: String,
+  secret: Array,
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -140,11 +140,15 @@ app.get("/register", function(req, res) {
 });
 
 app.get("/secrets", function(req, res) {
-  if (req.isAuthenticated()){
-    res.render("secrets");
-  } else {
-    res.redirect("register");
-  }
+  User.find({"secret": {$ne: null}}, function(err, foundUsers){
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUsers) {
+        res.render("secrets", {usersWithSecrets: foundUsers});
+      }
+    }
+  });
 });
 
 app.get("/submit", function(req, res){
@@ -165,7 +169,7 @@ app.post("/submit", function(req, res){
       console.log(err);
     } else {
       if (foundUser) {
-        foundUser.secret = submittedSecret;
+        foundUser.secret.push(submittedSecret);
         foundUser.save(function(){
           res.redirect("/secrets");
         });
